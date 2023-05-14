@@ -1,6 +1,7 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
+var jwt = require('jsonwebtoken');
 require('dotenv').config()
 const app = express();
 const port = process.env.PORT || 5000;
@@ -26,6 +27,24 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+const verifyJWT = (req, res, next) =>{
+  console.log('hitting verify jwt');
+  console.log(req.headers.authorization);
+  // const authorization = req.headers.authorization;
+  // if(authorization){
+  //   return res.status(401).send({error: true, message: 'unauthorazid access'})
+  // }
+  
+  // const token = authorization.split(' ')[1];
+  // console.log('token inside verify jwt', token);
+
+
+}
+
+
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -34,6 +53,17 @@ async function run() {
 
     const servicesCollection = client.db('carDoctor').collection('services');
     const bookingCollection = client.db('carDoctor').collection('bookings');
+
+
+    // jwt 
+    app.post('/jwt', (req, res)=>{
+      const user = req.body;
+      console.log(user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
+      console.log(token);
+      res.send({token});
+    })
+
 
 
     // read all data from the database:-
@@ -62,7 +92,7 @@ async function run() {
     //bookings: Find some data through query:-
 
     app.get('/bookings', async(req, res)=>{
-        // console.log(req.query.email);
+        console.log(req.headers.authorization);
         let query = {}
         if(req.query?.email){
             query = {email: req.query.email}
